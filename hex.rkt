@@ -44,5 +44,5 @@
 ;; Returns a string of hex digits corresponding to the first `nbytes`
 ;; bytes from `seq`.
 (define (collect-hex seq nbytes)
-  (list->string (flatten (for/list ([(i b) (in-parallel nbytes seq)])
+  (list->string (flatten (for/list ([i nbytes] [b seq])
 			   (list (hex-digit (arithmetic-shift b -4)) (hex-digit b))))))

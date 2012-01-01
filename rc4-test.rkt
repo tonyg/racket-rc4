@@ -17,7 +17,7 @@
     (#"Secret" "04d46b053ca87b59" #"Attack at dawn" "45a01f645fc35b383552544b9bf5")
     ))
 
-(for ([vec (in-list wikipedia-test-vectors)])
+(for ([vec wikipedia-test-vectors])
   (match vec
     [(list key stream-prefix-hex plain-text cipher-text-hex)
      (check-equal? (collect-hex (in-rc4-stream key 0) (/ (string-length stream-prefix-hex) 2))
@@ -309,17 +309,17 @@
       (4096 "370b1c1fe655916d97fd0d47ca1d72b8")))
     ))
 
-(for ([vec (in-list rfc6229-test-vectors)])
+(for ([vec rfc6229-test-vectors])
   (match vec
-    [(list key (list (list offset stream-prefix-hex) ...))
+    [(list key (list (list offsets stream-prefixes-hex) ...))
      (define stream-output (collect-hex (in-rc4-stream key 0) 8192))
-     (for ([(offset stream-prefix-hex) (in-parallel (in-list offset) (in-list stream-prefix-hex))])
+     (for ([offset offsets] [stream-prefix-hex stream-prefixes-hex])
        (define prefix-len (string-length stream-prefix-hex))
        (check-equal? (list key offset (substring stream-output
 						 (* offset 2)
 						 (+ (* offset 2) prefix-len)))
 		     (list key offset stream-prefix-hex)))]))
 
-(for ([n (in-list '(0 768 3072))])
+(for ([n '(0 768 3072)])
   (check-equal? (substring (collect-hex (in-rc4-stream #"Key" 0) (+ n 128)) (* n 2))
 		(collect-hex (in-rc4-stream #"Key" n) 128)))

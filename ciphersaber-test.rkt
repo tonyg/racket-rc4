@@ -19,7 +19,7 @@
      #"The Fourth Amendment to the Constitution of the United States of America\r\n\r\n\"The right of the people to be secure in their persons, houses, papers, and \r\neffects, against unreasonable searches and seizures, shall not be violated, \r\nand no Warrants shall issue, but upon probable cause, supported by Oath or \r\naffirmation, and particularly describing the place to be searched, and the \r\npersons or things to be seized.\"\r\n")
     ))
 
-(for ([vec (in-list ciphersaber-test-vectors)])
+(for ([vec ciphersaber-test-vectors])
   (match vec
     [(list (list key init-count drop-count ciphertext-hex) plaintext)
      (check-equal? (ciphersaber-decrypt key init-count drop-count (hex->bytes ciphertext-hex))

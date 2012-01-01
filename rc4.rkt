@@ -49,8 +49,7 @@
 ;; `length` elements) are placed in the leading bytes of the result.
 (define (sequence->bytes/length length seq)
   (define result (make-bytes length))
-  (for ([(i b) (in-parallel length seq)])
-    (bytes-set! result i b))
+  (for ([i length] [b seq]) (bytes-set! result i b))
   result)
 
 ;; vector? exact-integer? exact-integer? -> void?
@@ -108,8 +107,7 @@
 ;; output with plain- or ciphertext, for example.
 (define (xor-generator seq1 seq2)
   (generator ()
-    (for ([(b1 b2) (in-parallel seq1 seq2)])
-      (yield (bitwise-xor b1 b2)))
+    (for ([b1 seq1] [b2 seq2]) (yield (bitwise-xor b1 b2)))
     (yield #f)))
 
 ;; sequence? sequence? -> sequence?
