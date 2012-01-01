@@ -48,9 +48,6 @@
   (vector-set! S j (vector-ref S i))
   (vector-set! S i Sj))
 
-(define (truncate-to-byte n)
-  (bitwise-and n 255))
-
 ;; The repeat-count is to accommodate CipherSaber-2.
 (define (rc4-initialize key [repeat-count 1])
   (define keylength (bytes-length key))
@@ -58,7 +55,7 @@
   (define j 0)
   (for ([_ repeat-count])
     (for ([i 256])
-      (set! j (truncate-to-byte (+ j (vector-ref S i) (bytes-ref key (modulo i keylength)))))
+      (set! j (bitwise-and 255 (+ j (vector-ref S i) (bytes-ref key (modulo i keylength)))))
       (swap! S i j)))
   S)
 
@@ -66,10 +63,10 @@
   (define i 0)
   (define j 0)
   (define (round)
-    (set! i (truncate-to-byte (+ i 1)))
-    (set! j (truncate-to-byte (+ j (vector-ref S i))))
+    (set! i (bitwise-and 255 (+ i 1)))
+    (set! j (bitwise-and 255 (+ j (vector-ref S i))))
     (swap! S i j)
-    (vector-ref S (truncate-to-byte (+ (vector-ref S i) (vector-ref S j)))))
+    (vector-ref S (bitwise-and 255 (+ (vector-ref S i) (vector-ref S j)))))
   (for ([_ drop-count]) (round))
   round)
 
