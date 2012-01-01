@@ -1,0 +1,41 @@
+#!/usr/bin/env racket
+#lang racket/base
+
+(require racket/match)
+(require racket/cmdline)
+(require "ciphersaber.rkt")
+
+(define init-count (make-parameter 10))
+(define drop-count (make-parameter 0))
+(define key (make-parameter #f))
+
+(command-line #:program "cs-dec"
+	      #:once-each
+	      [("-i" "--init-count") v
+	       (""
+		"Number of repeats of key initialization procedure (default 10)."
+		"Use 1 for CipherSaber-1, and any other value (usually 10) for CipherSaber-2.")
+	       (init-count (string->number v))]
+	      [("-d" "--drop-count") v
+	       (""
+		"Number of bytes of cipher stream output to drop (default 0)."
+		"CS-1 and CS-2 both use zero (!), but the underlying RC4 cipher is vulnerable"
+		"unless some value >=768 is used.")
+	       (drop-count (string->number v))]
+	      [("-k" "--key") v
+	       (""
+		"The key string. Will be encoded to binary using UTF-8."
+		"If this parameter is absent, the key will be taken from the first line"
+		"of standard input, immediately preceding the ciphertext.")
+	       (key (string->bytes/utf-8 v))])
+
+(when (not (key))
+  (key (string->bytes/utf-8 (read-line))))
+
+(define iv (read-bytes 10))
+(for ([b (in-ciphersaber-decrypt* (key)
+				  iv
+				  (init-count)
+				  (drop-count)
+				  (in-input-port-bytes (current-input-port)))])
+  (write-byte b))
