@@ -27,13 +27,22 @@
 (provide hex->bytes
 	 collect-hex)
 
+;; string? -> bytes?
+;; Converts a string of length 2N containing hex digits only to a
+;; byte-vector of length N.
 (define (hex->bytes str)
   (list->bytes (for/list ([i (/ (string-length str) 2)])
 		 (string->number (substring str (* i 2) (* (+ i 1) 2)) 16))))
 
 (check-equal? (hex->bytes "01020304") (bytes 1 2 3 4))
 
+;; exact-integer? -> character?
+;; Returns the hex digit character corresponding to the low 4 bits of `n`.
 (define (hex-digit n) (string-ref (number->string (bitwise-and n 15) 16) 0))
+
+;; sequence? exact-integer? -> string?
+;; Returns a string of hex digits corresponding to the first `nbytes`
+;; bytes from `seq`.
 (define (collect-hex seq nbytes)
   (list->string (flatten (for/list ([(i b) (in-parallel nbytes seq)])
 			   (list (hex-digit (arithmetic-shift b -4)) (hex-digit b))))))

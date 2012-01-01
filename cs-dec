@@ -53,7 +53,7 @@
 (when (not (key))
   (key (string->bytes/utf-8 (read-line))))
 
-(define iv (read-bytes 10))
+(define iv (read-bytes ciphersaber-iv-length))
 (for ([b (in-ciphersaber-decrypt* (key)
 				  iv
 				  (init-count)
