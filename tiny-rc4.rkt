@@ -1,0 +1,35 @@
+#lang racket/base
+
+(provide rc4-initialize rc4-stream-generator rc4-crypt)
+
+(define (swap! S i j)
+  (define Sj (vector-ref S j))
+  (vector-set! S j (vector-ref S i))
+  (vector-set! S i Sj))
+
+(define (rc4-initialize key)
+  (define keylength (bytes-length key))
+  (define S (for/vector ([i 256]) i))
+  (define j 0)
+  (for ([i 256])
+    (set! j (bitwise-and 255 (+ j (vector-ref S i) (bytes-ref key (modulo i keylength)))))
+    (swap! S i j))
+  S)
+
+(define (rc4-stream-generator S drop-count)
+  (define i 0)
+  (define j 0)
+  (define (round)
+    (set! i (bitwise-and 255 (+ i 1)))
+    (set! j (bitwise-and 255 (+ j (vector-ref S i))))
+    (swap! S i j)
+    (vector-ref S (bitwise-and 255 (+ (vector-ref S i) (vector-ref S j)))))
+  (for ([_ drop-count]) (round))
+  round)
+
+(define (rc4-crypt S drop-count input-bytes)
+  (define g (rc4-stream-generator S drop-count))
+  (define len (bytes-length input-bytes))
+  (define result (make-bytes len))
+  (for ([i len]) (bytes-set! result i (bitwise-xor (bytes-ref input-bytes i) (g))))
+  result)
